@@ -10,7 +10,8 @@
 .PARAMETER MenuChoice
     Skip menu and run specific test:
     1=Microsoft (DNS/TCP), 2=Windows Update, 3=Defender AV, 4=Defender ATP,
-    5=SmartScreen, 6=Telemetry, 7=AAD SSPR, 8=Chrome, 9=Firefox, 10=Adobe, 11=All
+    5=SmartScreen, 6=Telemetry, 7=AAD SSPR, 8=Chrome, 9=Firefox, 10=Adobe, 
+    11=Package Managers, 12=All
 
 .PARAMETER SavePath
     Path to save results CSV file
@@ -22,7 +23,7 @@
     .\Connectiontest.ps1 -MenuChoice 1
 
 .EXAMPLE
-    .\Connectiontest.ps1 -MenuChoice 11 -SavePath ".\results.csv"
+    .\Connectiontest.ps1 -MenuChoice 12 -SavePath ".\results.csv"
 
 powershell -ExecutionPolicy Bypass -File "c:\temp\Connectiontest.ps1" -MenuChoice 11 -SavePath ".\results.csv"
 #>
@@ -30,7 +31,7 @@ powershell -ExecutionPolicy Bypass -File "c:\temp\Connectiontest.ps1" -MenuChoic
 [CmdletBinding()]
 param(
     [Parameter(Mandatory=$false)]
-    [ValidateRange(0,11)]
+    [ValidateRange(0,12)]
     [int]$MenuChoice = 0,
 
     [Parameter(Mandatory=$false)]
