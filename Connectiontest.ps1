@@ -1169,7 +1169,7 @@ Function Test-WindowsUpdateConnectivity() {
     }
 
     $elapsed = (Get-Date) - $startTime
-    $blockedCount = ($results | Where-Object { $_.Blocked -eq $true }).Count
+    $blockedCount = @($results | Where-Object { $_.Blocked -eq $true }).Count
     Write-LogMessage -Message "Windows Update test completed in $($elapsed.ToString('mm\:ss')) - $($results.Count) URLs tested, $blockedCount blocked" -Level $(if ($blockedCount -gt 0) { 'WARN' } else { 'SUCCESS' })
 
     return $results
@@ -1677,7 +1677,7 @@ Function Invoke-TestSelection() {
                 $results = $allResults
                 
                 $allElapsed = (Get-Date) - $allStartTime
-                $totalBlocked = ($allResults | Where-Object { $_.Blocked -eq $true }).Count
+                $totalBlocked = @($allResults | Where-Object { $_.Blocked -eq $true }).Count
                 $totalPassed = $allResults.Count - $totalBlocked
                 
                 Write-Host "`n" -NoNewline
