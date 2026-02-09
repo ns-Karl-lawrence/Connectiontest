@@ -10,52 +10,103 @@ A comprehensive PowerShell connectivity testing tool for Microsoft services and 
 
 ## Quick Start
 
+### Download and Run from PowerShell
+
+Pick the option that matches how you prefer to obtain the script:
+
+1. **Save locally (recommended):**
+
+   ```powershell
+   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ns-Karl-lawrence/Connectiontest/main/Connectiontest.ps1" -OutFile ".\Connectiontest.ps1"
+   .\Connectiontest.ps1
+   ```
+
+2. **One-liner (Windows PowerShell 5.1):** Downloads to `%TEMP%` and runs immediately.
+
+   ```powershell
+   powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ns-Karl-lawrence/Connectiontest/main/Connectiontest.ps1' -OutFile $env:TEMP\Connectiontest.ps1; & $env:TEMP\Connectiontest.ps1"
+   ```
+
+3. **One-liner (PowerShell 7+ / pwsh):**
+
+   ```powershell
+   pwsh -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ns-Karl-lawrence/Connectiontest/main/Connectiontest.ps1' -OutFile $env:TEMP/Connectiontest.ps1; & $env:TEMP/Connectiontest.ps1"
+   ```
+
+4. **Run without saving (only if you already trust/reviewed the code):**
+
+   ```powershell
+   iex (Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ns-Karl-lawrence/Connectiontest/main/Connectiontest.ps1" -UseBasicParsing).Content
+   ```
+
+5. **Download and run Windows Defender Antivirus test only:**
+
+   ```powershell
+   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ns-Karl-lawrence/Connectiontest/main/Connectiontest.ps1" -OutFile ".\Connectiontest.ps1"
+   .\Connectiontest.ps1 -MenuChoice 3
+   ```
+
+6. **Download and run with parameters (Save to CSV):**
+
+   ```powershell
+   Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ns-Karl-lawrence/Connectiontest/main/Connectiontest.ps1" -OutFile ".\Connectiontest.ps1"
+   .\Connectiontest.ps1 -MenuChoice 11 -SavePath "C:\Reports\connectivity-results.csv"
+   ```
+
+7. **One-liner with parameters (PowerShell 5.1):**
+
+   ```powershell
+   powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "& {Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/ns-Karl-lawrence/Connectiontest/main/Connectiontest.ps1' -OutFile $env:TEMP\ct.ps1; & $env:TEMP\ct.ps1 -MenuChoice 2 -SavePath 'C:\temp\wupdate-test.csv'}"
+   ```
+
+8. **Run from memory with parameters (no saving to disk):**
+
+   ```powershell
+   & ([ScriptBlock]::Create((Invoke-WebRequest -Uri "https://raw.githubusercontent.com/ns-Karl-lawrence/Connectiontest/main/Connectiontest.ps1" -UseBasicParsing).Content)) -MenuChoice 3 -SavePath "C:\temp\defender-results.csv"
+   ```
+
 ### Interactive Mode (Menu)
 
 ```powershell
-.\Connectiontest_ps1.ps1
+.\Connectiontest.ps1
 ```
 
 ### Command-Line Mode (Skip Menu)
 
 ```powershell
 # Run a specific test
-.\Connectiontest_ps1.ps1 -MenuChoice 1
+.\Connectiontest.ps1 -MenuChoice 1
 
 # Run all tests and save results
-.\Connectiontest_ps1.ps1 -MenuChoice 11 -SavePath "C:\temp\connectivity_results.csv"
+.\Connectiontest.ps1 -MenuChoice 11 -SavePath "C:\temp\connectivity_results.csv"
 ```
 
 ## Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `-MenuChoice` | Int (0-11) | No | Skip menu and run specific test directly |
-| `-SavePath` | String | No | Path to save results as CSV file |
+- **`-MenuChoice`** *(Int 0-11, optional)* – Skip the menu and run a specific test directly.
+- **`-SavePath`** *(String, optional)* – Save CSV output to the provided path.
 
 ## Available Tests
 
-| Choice | Test Name | Description |
-| ------- | --------- | ----------- |
-| 1 | **Microsoft Connectivity** | DNS + TCP tests for 40+ Microsoft endpoints (Windows Update, M365, Azure AD, Teams, etc.) |
-| 2 | **Windows Update** | HTTP connectivity to Windows Update services and CDNs |
-| 3 | **Windows Defender Antivirus** | MAPS, definition updates, CRL, and telemetry endpoints |
-| 4 | **Windows Defender ATP** | Advanced Threat Protection endpoints, Security Center |
-| 5 | **Windows Defender SmartScreen** | SmartScreen URL reputation services |
-| 6 | **Windows Telemetry** | Diagnostic data and Windows Error Reporting endpoints |
-| 7 | **Azure AD SSPR** | Self-Service Password Reset endpoints |
-| 8 | **Chrome Updates** | Google Chrome update servers |
-| 9 | **Firefox Updates** | Mozilla Firefox update and add-on servers |
-| 10 | **Adobe Updates** | Adobe Reader/Acrobat update servers |
-| 11 | **Run ALL Tests** | Execute all 10 tests sequentially |
-| 0 | **Exit** | Exit the application |
+- **Microsoft Connectivity** – DNS + TCP tests for 40+ Microsoft endpoints (Windows Update, M365, Azure AD, Teams, etc.).
+- **Windows Update** – HTTP connectivity to Windows Update services and CDNs.
+- **Windows Defender Antivirus** – MAPS, definition updates, CRL, and telemetry endpoints.
+- **Windows Defender ATP** – Advanced Threat Protection endpoints, Security Center.
+- **Windows Defender SmartScreen** – SmartScreen URL reputation services.
+- **Windows Telemetry** – Diagnostic data and Windows Error Reporting endpoints.
+- **Azure AD SSPR** – Self-Service Password Reset endpoints.
+- **Chrome Updates** – Google Chrome update servers.
+- **Firefox Updates** – Mozilla Firefox update and add-on servers.
+- **Adobe Updates** – Adobe Reader/Acrobat update servers.
+- **Run ALL Tests** – Execute all 10 tests sequentially.
+- **Exit** – Exit the application.
 
 ## Usage Examples
 
 ### Example 1: Interactive Menu
 
 ```powershell
-PS C:\> .\Connectiontest_ps1.ps1
+PS C:\> .\Connectiontest.ps1
 
 ================================================
         CONNECTION TEST SUITE v2.0
@@ -76,7 +127,7 @@ Enter your choice (0-11):
 ### Example 2: Test Microsoft Connectivity Only
 
 ```powershell
-.\Connectiontest_ps1.ps1 -MenuChoice 1
+.\Connectiontest.ps1 -MenuChoice 1
 ```
 
 **Output:**
@@ -110,13 +161,13 @@ Enter your choice (0-11):
 ### Example 3: Run All Tests with CSV Export
 
 ```powershell
-.\Connectiontest_ps1.ps1 -MenuChoice 11 -SavePath "C:\Reports\connectivity.csv"
+.\Connectiontest.ps1 -MenuChoice 11 -SavePath "C:\Reports\connectivity.csv"
 ```
 
 ### Example 4: Windows Update Connectivity Check
 
 ```powershell
-.\Connectiontest_ps1.ps1 -MenuChoice 2
+.\Connectiontest.ps1 -MenuChoice 2
 ```
 
 **Output:**
@@ -132,6 +183,38 @@ Enter your choice (0-11):
   Duration: 00:45
 [2024-02-09 09:20:45] [SUCCESS] Windows Update test completed: 14 passed, 1 blocked
 ```
+
+### Example 5: Save Microsoft Connectivity Results to CSV
+
+```powershell
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+$path = "C:\Reports\microsoft-connectivity-$timestamp.csv"
+.\Connectiontest.ps1 -MenuChoice 1 -SavePath $path
+Get-Item $path
+```
+
+- Uses `-MenuChoice 1` to target the Microsoft test directly.
+- Adds `-SavePath` so the CSV is stored with a timestamped filename for auditing.
+- `Get-Item` confirms where the CSV landed.
+
+### Example 6: Run All Tests Headless and Export JSON
+
+```powershell
+$results = .\Connectiontest.ps1 -MenuChoice 11
+$results | ConvertTo-Json -Depth 4 | Out-File "C:\Reports\connectivity.json"
+```
+
+- `-MenuChoice 11` skips the menu and runs every test.
+- Captured output can be exported to JSON for ingestion in other systems.
+
+### Example 7: Scheduled Task Compatible Command
+
+```powershell
+powershell.exe -File "C:\Tools\Connectiontest.ps1" -MenuChoice 11 -SavePath "C:\Reports\daily-connectivity.csv"
+```
+
+- Suitable for Task Scheduler or RMM tools.
+- Combines both parameters so the job is non-interactive and produces an artifact automatically.
 
 ## Output Format
 
@@ -227,12 +310,10 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 #### Reading Results
 
-| Status | Meaning |
-| ------- | ------- |
-| ✅ **OPEN** / **OK** | Endpoint is reachable |
-| ⚠️ **CLOSED/TIMEOUT** | Port not responding (may be blocked) |
-| ❌ **FAILED** | DNS or connection error |
-| 🔒 **Blocked** | Endpoint blocked by proxy/firewall |
+- ✅ **OPEN/OK** – Endpoint is reachable.
+- ⚠️ **CLOSED/TIMEOUT** – Port not responding (may be blocked).
+- ❌ **FAILED** – DNS or connection error.
+- 🔒 **Blocked** – Endpoint blocked by proxy/firewall.
 
 ## Integration with Other Tools
 
@@ -240,7 +321,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ```powershell
 # Run test and capture results
-$results = .\Connectiontest_ps1.ps1 -MenuChoice 2
+$results = .\Connectiontest.ps1 -MenuChoice 2
 
 # Export to JSON
 $results | ConvertTo-Json -Depth 3 | Out-File "results.json"
@@ -249,17 +330,15 @@ $results | ConvertTo-Json -Depth 3 | Out-File "results.json"
 ### Filter Blocked Endpoints
 
 ```powershell
-$results = .\Connectiontest_ps1.ps1 -MenuChoice 11
+$results = .\Connectiontest.ps1 -MenuChoice 11
 $blocked = $results | Where-Object { $_.Blocked -eq $true }
 $blocked | Format-Table TestUrl, Description, ActualStatusCode
 ```
 
 ## Version History
 
-| Version | Changes |
-|---------|---------|
-| 2.0     | Added comprehensive error handling, progress tracking, logging functions, HTTP test wrapper |
-| 1.0     | Initial release with basic connectivity tests |
+- **2.0** – Added comprehensive error handling, progress tracking, logging functions, and HTTP test wrapper.
+- **1.0** – Initial release with basic connectivity tests.
 
 ## License
 
