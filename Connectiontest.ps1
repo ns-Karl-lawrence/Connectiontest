@@ -260,7 +260,7 @@ Function Invoke-HttpConnectivityTest {
 
     # Display summary
     $elapsed = (Get-Date) - $startTime
-    $blockedCount = ($results | Where-Object { $_.Blocked -eq $true }).Count
+    $blockedCount = @($results | Where-Object { $_.Blocked -eq $true }).Count
     
     Write-Host ""
     Write-Host "  Results: $($results.Count - $blockedCount) OK, $blockedCount blocked/failed" -ForegroundColor $(if ($blockedCount -gt 0) { 'Yellow' } else { 'Green' })
