@@ -888,7 +888,21 @@ $script:MSTargets = @(
 
     # --- Microsoft Intune / Endpoint Manager ---
     @{ Display = 'Intune Management';                            Host = 'manage.microsoft.com' }
+    @{ Display = 'Intune Enrollment';                           Host = 'enrollment.manage.microsoft.com' }
+    @{ Display = 'Intune ADRS';                                  Host = 'adrs.manage.microsoft.com' }
+    @{ Display = 'AutoPilot (ZTD)';                              Host = 'ztd.dds.microsoft.com' }
+    @{ Display = 'Co-management ConfigMgr';                      Host = 'configmgr.manage.microsoft.com' }
+    @{ Display = 'Device Management';                            Host = 'devicemanagement.microsoft.com' }
+    @{ Display = 'Enterprise App Catalog';                         Host = 'enterprise.appcatalog.microsoft.com' }
     @{ Display = 'Azure AD Graph (Legacy)';                      Host = 'graph.windows.net' }
+
+    # --- OneDrive for Business ---
+    @{ Display = 'OneDrive Consumer';                            Host = 'onedrive.live.com' }
+    @{ Display = 'OneDrive for Business API';                    Host = 'api.onedrive.com' }
+    @{ Display = 'OneDrive Sync Client';                         Host = 'g.live.com' }
+    @{ Display = 'SharePoint Online Admin';                      Host = 'admin.sharepoint.com' }
+    @{ Display = 'SharePoint Online (Example Tenant)';           Host = 'yourtenant.sharepoint.com' }
+    @{ Display = 'OneDrive for Business (Example Tenant)';       Host = 'yourtenant-my.sharepoint.com' }
 
     # --- Certificate Revocation Lists (CRLs) and OCSP ---
     @{ Display = 'Microsoft CRL';                                Host = 'mscrl.microsoft.com' }
@@ -1281,6 +1295,41 @@ Function Test-FirefoxUpdateConnectivity() {
     return Invoke-HttpConnectivityTest -TestName 'Firefox Updates' -TestData $data -PerformBluecoatLookup:$PerformBluecoatLookup
 }
 
+Function Test-PackageManagerConnectivity() {
+    <#
+    .SYNOPSIS
+    Gets connectivity information for package managers (winget, PowerShell Gallery, Chocolatey).
+    #>
+    [CmdletBinding()]
+    [OutputType([System.Collections.Generic.List[pscustomobject]])]
+    Param(
+        [switch]$PerformBluecoatLookup
+    )
+
+    $isVerbose = $VerbosePreference -eq 'Continue'
+    $data = New-Object System.Collections.Generic.List[System.Collections.Hashtable]
+
+    # Windows Package Manager (winget)
+    $data.Add(@{ TestUrl = 'https://api.github.com'; ExpectedStatusCode = 403; Description = 'GitHub API - winget source'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://raw.githubusercontent.com'; ExpectedStatusCode = 400; Description = 'GitHub raw content - winget manifests'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://winget.azureedge.net'; ExpectedStatusCode = 404; Description = 'Windows Package Manager CDN'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://cdn.winget.microsoft.com'; ExpectedStatusCode = 404; Description = 'Windows Package Manager Microsoft CDN'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://storeedgefd.dsx.mp.microsoft.com'; ExpectedStatusCode = 403; Description = 'Microsoft Store Edge for winget'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://in.appcenter.ms'; ExpectedStatusCode = 404; Description = 'Microsoft App Center for winget updates'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+
+    # PowerShell Gallery
+    $data.Add(@{ TestUrl = 'https://www.powershellgallery.com'; ExpectedStatusCode = 200; Description = 'PowerShell Gallery - module downloads'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://psg-prod-centralus.azureedge.net'; ExpectedStatusCode = 404; Description = 'PowerShell Gallery CDN'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://go.microsoft.com'; ExpectedStatusCode = 404; Description = 'Microsoft redirect service for PowerShell'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+
+    # Chocolatey
+    $data.Add(@{ TestUrl = 'https://chocolatey.org'; ExpectedStatusCode = 200; Description = 'Chocolatey website'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://community.chocolatey.org'; ExpectedStatusCode = 200; Description = 'Chocolatey Community Repository'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+    $data.Add(@{ TestUrl = 'https://packages.chocolatey.org'; ExpectedStatusCode = 403; Description = 'Chocolatey package downloads'; PerformBluecoatLookup=$PerformBluecoatLookup; Verbose=$isVerbose })
+
+    return Invoke-HttpConnectivityTest -TestName 'Package Managers' -TestData $data -PerformBluecoatLookup:$PerformBluecoatLookup
+}
+
 #endregion
 
 #region Microsoft Service Connectivity Tests
@@ -1562,8 +1611,9 @@ Function Show-Menu() {
     Write-Host "  [8] Chrome Updates" -ForegroundColor White
     Write-Host "  [9] Firefox Updates" -ForegroundColor White
     Write-Host "  [10] Adobe Updates" -ForegroundColor White
+    Write-Host "  [11] Package Managers (winget/choco/PSGallery)" -ForegroundColor White
     Write-Host ""
-    Write-Host "  [11] Run ALL Tests" -ForegroundColor Yellow
+    Write-Host "  [12] Run ALL Tests" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  [0] Exit" -ForegroundColor Red
     Write-Host ""
@@ -1634,7 +1684,12 @@ Function Invoke-TestSelection() {
                 $results = Test-ARMUpdateConnectivity
                 break 
             }
-            11 {
+            11 { 
+                $testName = 'Package Managers'
+                $results = Test-PackageManagerConnectivity
+                break 
+            }
+            12 {
                 $testName = 'All Connectivity Tests'
                 Write-LogMessage -Message "Starting comprehensive connectivity test suite" -Level 'INFO'
                 Write-Host "`n" -NoNewline
@@ -1644,7 +1699,7 @@ Function Invoke-TestSelection() {
                 
                 $allStartTime = Get-Date
                 $allResults = @()
-                $testCount = 10
+                $testCount = 11
                 $currentTest = 0
                 
                 $tests = @(
@@ -1657,7 +1712,8 @@ Function Invoke-TestSelection() {
                     @{ Name = 'Azure AD SSPR'; Function = { Test-AADSSPRConnectivity } },
                     @{ Name = 'Chrome Updates'; Function = { Test-ChromeUpdateConnectivity } },
                     @{ Name = 'Firefox Updates'; Function = { Test-FirefoxUpdateConnectivity } },
-                    @{ Name = 'Adobe Updates'; Function = { Test-ARMUpdateConnectivity } }
+                    @{ Name = 'Adobe Updates'; Function = { Test-ARMUpdateConnectivity } },
+                    @{ Name = 'Package Managers'; Function = { Test-PackageManagerConnectivity } }
                 )
                 
                 foreach ($test in $tests) {
@@ -1728,17 +1784,17 @@ Write-LogMessage -Message "PowerShell Version: $($PSVersionTable.PSVersion)" -Le
 Write-LogMessage -Message "Running as: $([System.Security.Principal.WindowsIdentity]::GetCurrent().Name)" -Level 'DEBUG'
 
 try {
-    if ($MenuChoice -gt 0 -and $MenuChoice -le 11) {
+    if ($MenuChoice -gt 0 -and $MenuChoice -le 12) {
         Write-LogMessage -Message "Running test selection: $MenuChoice (command-line mode)" -Level 'INFO'
         $null = Invoke-TestSelection -Choice $MenuChoice
     }
     else {
         do {
             Show-Menu
-            $selection = Read-Host "Enter your choice (0-11)"
+            $selection = Read-Host "Enter your choice (0-12)"
             try {
                 $choice = [int]$selection
-                if ($choice -ge 0 -and $choice -le 11) {
+                if ($choice -ge 0 -and $choice -le 12) {
                     $null = Invoke-TestSelection -Choice $choice
 
                     if ($choice -ne 0) {

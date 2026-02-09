@@ -78,17 +78,17 @@ Pick the option that matches how you prefer to obtain the script:
 .\Connectiontest.ps1 -MenuChoice 1
 
 # Run all tests and save results
-.\Connectiontest.ps1 -MenuChoice 11 -SavePath "C:\temp\connectivity_results.csv"
+.\Connectiontest.ps1 -MenuChoice 12 -SavePath "C:\temp\connectivity_results.csv"
 ```
 
 ## Parameters
 
-- **`-MenuChoice`** *(Int 0-11, optional)* – Skip the menu and run a specific test directly.
+- **`-MenuChoice`** *(Int 0-12, optional)* – Skip the menu and run a specific test directly.
 - **`-SavePath`** *(String, optional)* – Save CSV output to the provided path.
 
 ## Available Tests
 
-- **Microsoft Connectivity** – DNS + TCP tests for 40+ Microsoft endpoints (Windows Update, M365, Azure AD, Teams, etc.).
+- **Microsoft Connectivity** – DNS + TCP tests for 50+ Microsoft endpoints (Windows Update, M365, Azure AD, Teams, Intune, OneDrive, etc.).
 - **Windows Update** – HTTP connectivity to Windows Update services and CDNs.
 - **Windows Defender Antivirus** – MAPS, definition updates, CRL, and telemetry endpoints.
 - **Windows Defender ATP** – Advanced Threat Protection endpoints, Security Center.
@@ -98,7 +98,8 @@ Pick the option that matches how you prefer to obtain the script:
 - **Chrome Updates** – Google Chrome update servers.
 - **Firefox Updates** – Mozilla Firefox update and add-on servers.
 - **Adobe Updates** – Adobe Reader/Acrobat update servers.
-- **Run ALL Tests** – Execute all 10 tests sequentially.
+- **Package Managers** – Windows Package Manager (winget), PowerShell Gallery, and Chocolatey.
+- **Run ALL Tests** – Execute all 11 tests sequentially.
 - **Exit** – Exit the application.
 
 ## Usage Examples
@@ -116,12 +117,13 @@ PS C:\> .\Connectiontest.ps1
   [2] Windows Update (HTTP)
   [3] Windows Defender Antivirus
   ...
-  [11] Run ALL Tests
+  [11] Package Managers (winget/choco/PSGallery)
+  [12] Run ALL Tests
 
   [0] Exit
 
 ================================================
-Enter your choice (0-11): 
+Enter your choice (0-12): 
 ```
 
 ### Example 2: Test Microsoft Connectivity Only
@@ -161,7 +163,7 @@ Enter your choice (0-11):
 ### Example 3: Run All Tests with CSV Export
 
 ```powershell
-.\Connectiontest.ps1 -MenuChoice 11 -SavePath "C:\Reports\connectivity.csv"
+.\Connectiontest.ps1 -MenuChoice 12 -SavePath "C:\Reports\connectivity.csv"
 ```
 
 ### Example 4: Windows Update Connectivity Check
@@ -184,7 +186,18 @@ Enter your choice (0-11):
 [2024-02-09 09:20:45] [SUCCESS] Windows Update test completed: 14 passed, 1 blocked
 ```
 
-### Example 5: Save Microsoft Connectivity Results to CSV
+### Example 5: Package Manager Connectivity
+
+```powershell
+.\Connectiontest.ps1 -MenuChoice 11 -SavePath "C:\Reports\package-managers.csv"
+```
+
+**Tests:**
+- Windows Package Manager (winget) – GitHub API, Microsoft CDNs
+- PowerShell Gallery – Module downloads
+- Chocolatey – Package repository access
+
+### Example 6: Save Microsoft Connectivity Results to CSV
 
 ```powershell
 $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -197,20 +210,20 @@ Get-Item $path
 - Adds `-SavePath` so the CSV is stored with a timestamped filename for auditing.
 - `Get-Item` confirms where the CSV landed.
 
-### Example 6: Run All Tests Headless and Export JSON
+### Example 7: Run All Tests Headless and Export JSON
 
 ```powershell
-$results = .\Connectiontest.ps1 -MenuChoice 11
+$results = .\Connectiontest.ps1 -MenuChoice 12
 $results | ConvertTo-Json -Depth 4 | Out-File "C:\Reports\connectivity.json"
 ```
 
-- `-MenuChoice 11` skips the menu and runs every test.
+- `-MenuChoice 12` skips the menu and runs every test.
 - Captured output can be exported to JSON for ingestion in other systems.
 
-### Example 7: Scheduled Task Compatible Command
+### Example 8: Scheduled Task Compatible Command
 
 ```powershell
-powershell.exe -File "C:\Tools\Connectiontest.ps1" -MenuChoice 11 -SavePath "C:\Reports\daily-connectivity.csv"
+powershell.exe -File "C:\Tools\Connectiontest.ps1" -MenuChoice 12 -SavePath "C:\Reports\daily-connectivity.csv"
 ```
 
 - Suitable for Task Scheduler or RMM tools.
@@ -240,7 +253,7 @@ Results include:
 
 ## Microsoft Endpoints Tested (Choice 1)
 
-The Microsoft Connectivity test checks DNS and TCP port 443 for:
+The Microsoft Connectivity test checks DNS and TCP port 443 for 50+ endpoints including:
 
 ### Windows Update & Delivery Optimization
 
@@ -249,6 +262,8 @@ The Microsoft Connectivity test checks DNS and TCP port 443 for:
 - `download.windowsupdate.com`
 - `delivery.mp.microsoft.com`
 - `ctldl.windowsupdate.com`
+- `fe2.update.microsoft.com`
+- `sls.update.microsoft.com`
 
 ### Microsoft 365 / Office 365
 
@@ -257,6 +272,25 @@ The Microsoft Connectivity test checks DNS and TCP port 443 for:
 - `outlook.office365.com`
 - `teams.microsoft.com`
 - `portal.office.com`
+- `admin.microsoft.com`
+- `officecdn.microsoft.com`
+
+### OneDrive for Business
+
+- `onedrive.live.com`
+- `api.onedrive.com`
+- `g.live.com`
+- `admin.sharepoint.com`
+
+### Microsoft Intune / Endpoint Manager / AutoPilot
+
+- `manage.microsoft.com`
+- `enrollment.manage.microsoft.com`
+- `adrs.manage.microsoft.com`
+- `ztd.dds.microsoft.com` (AutoPilot)
+- `configmgr.manage.microsoft.com` (Co-management)
+- `devicemanagement.microsoft.com`
+- `enterprise.appcatalog.microsoft.com`
 
 ### Azure Active Directory
 
@@ -266,6 +300,7 @@ The Microsoft Connectivity test checks DNS and TCP port 443 for:
 ### Telemetry & Diagnostics
 
 - `vortex.data.microsoft.com`
+- `vortex-win.data.microsoft.com`
 - `telemetry.microsoft.com`
 - `settings-win.data.microsoft.com`
 
@@ -274,12 +309,12 @@ The Microsoft Connectivity test checks DNS and TCP port 443 for:
 - `mscrl.microsoft.com`
 - `ocsp.digicert.com`
 - `crl3.digicert.com`
+- `crl4.digicert.com`
 
 ### Other Services
 
 - `time.windows.com` (NTP)
 - `www.msftconnecttest.com` (NCSI)
-- `manage.microsoft.com` (Intune)
 
 ## Troubleshooting
 
@@ -330,7 +365,7 @@ $results | ConvertTo-Json -Depth 3 | Out-File "results.json"
 ### Filter Blocked Endpoints
 
 ```powershell
-$results = .\Connectiontest.ps1 -MenuChoice 11
+$results = .\Connectiontest.ps1 -MenuChoice 12
 $blocked = $results | Where-Object { $_.Blocked -eq $true }
 $blocked | Format-Table TestUrl, Description, ActualStatusCode
 ```
